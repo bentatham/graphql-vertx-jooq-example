@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Singleton;
-
 import org.junit.Test;
+
+import com.coxautodev.graphql.tools.SchemaParserOptions;
 
 import ca.nanometrics.example.graphql.assets.Assets;
 import ca.nanometrics.example.graphql.schema.QueryResolver;
@@ -24,6 +24,7 @@ import graphql.GraphQL;
 import graphql.execution.AsyncExecutionStrategy;
 import graphql.schema.GraphQLSchema;
 import io.reactivex.Single;
+import io.reactivex.internal.observers.FutureSingleObserver;
 
 public class GraphQLModuleTest
 {
@@ -38,9 +39,12 @@ public class GraphQLModuleTest
     QueryResolver query = new QueryResolver(users, assets);
 
     // GraphQLSchema schema = DaggerGraphQLModuleTest_Component.create().schema();
+    SchemaParserOptions options = SchemaParserOptions.newOptions()
+        .genericWrappers(new SchemaParserOptions.GenericWrapper(FutureSingleObserver.class, 0)).build();
     GraphQLSchema schema = com.coxautodev.graphql.tools.SchemaParser.newParser()//
         .file("halo-users.graphqls")//
         .resolvers(query)//
+        .options(options)//
         .build().makeExecutableSchema();
 
     GraphQL gql = GraphQL.newGraphQL(schema).queryExecutionStrategy(new AsyncExecutionStrategy()).build();
@@ -56,12 +60,5 @@ public class GraphQLModuleTest
         .root(context) //
         .variables(args));
     assertThat(result.getErrors(), is(empty()));
-  }
-
-  @Singleton
-  @dagger.Component(modules = { GraphQLModule.class })
-  static interface Component
-  {
-    GraphQLSchema schema();
   }
 }

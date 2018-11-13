@@ -11,10 +11,7 @@ schema {
 # It contains users
 
 type Query {
-    users(userId : ID) : [User]
     organization(organizationId : ID!) : Organization
-    organizations(organizationIds : [ID]) : [Organization]
-    assets(assetId: ID) : [Asset]
 }
 
 type User {
